@@ -1,35 +1,46 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import PropertyCard from "@/components/property/PropertyCard"; // Assume this component exists
 
-export default function Home() {
-	const [properties, setProperties] = useState([]);
-	const [loading, setLoading] = useState(true);
+type Property = {
+  id: string;
+  name: string;
+  location: string;
+};
 
-	useEffect(() => {
-		const fetchProperties = async () => {
-			try {
-				const response = await axios.get("/api/properties");
-				setProperties(response.data);
-			} catch (error) {
-				console.error("Error fetching properties:", error);
-			} finally {
-				setLoading(false);
-			}
-		};
+export default function HomePage() {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
 
-		fetchProperties();
-	}, []);
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const response = await axios.get<Property[]>(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/properties`
+        );
+        setProperties(response.data);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-	if (loading) {
-		return <p>Loading...</p>;
-	}
+    fetchProperties();
+  }, []);
 
-	return (
-		<div className="grid grid-cols-3 gap-4">
-			{properties.map((property) => (
-				<PropertyCard key={property.id} property={property} />
-			))}
-		</div>
-	);
+  if (loading) {
+    return <p>Loading properties...</p>;
+  }
+
+  return (
+    <div>
+      <h1>Available Properties</h1>
+      {properties.map((property) => (
+        <div key={property.id}>
+          <h2>{property.name}</h2>
+          <p>{property.location}</p>
+        </div>
+      ))}
+    </div>
+  );
 }
